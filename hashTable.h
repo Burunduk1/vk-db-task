@@ -2,7 +2,7 @@
 
 #include "base.h"
 
-//#define DEBUG
+// #define DEBUG
 
 class HashTable {
 private:
@@ -23,11 +23,13 @@ private:
 		size_t i = (unsigned long long)x * P % n;
 		#ifdef DEBUG
 		int cnt = 0;
+		static int globalCnt = 0, callsCnt = 0;
+		callsCnt++;
 		#endif
 		while (used[i] == cc && table[i] != x) {
-			// printf("i = %ld of %ld : used = %d (cc=%d), table = %d, x = %d\n", i, n, used[i], cc, table[i], x);
 			#ifdef DEBUG
-			assert(++cnt <= 15);
+			assert(++globalCnt <= callsCnt + 50);
+			assert(++cnt <= 50); // 40 is not enough
 			#endif
 			if (++i == n)
 				i = 0;
@@ -43,7 +45,6 @@ public:
 		n = 2 * (data.size() + 1);
 		while (!isPrime(n))
 			n++;
-		// printf("-------------------------------------- size: %ld --> %ld\n", data.size(), n);
 		table.resize(n);
 		used.resize(n, 0);
 		cc++;
@@ -52,15 +53,12 @@ public:
 			fill(all(used), 0);
 		}
 		for (auto x : data) {
-			// printf("add %d\n", x);
 			auto i = position(x);
 			used[i] = cc;
 			table[i] = x;
-			// printf("put [%ld] <-- cc=%d, x=%d\n", i, cc, x);
 		}
 	}
 	bool count(int x) {
-		// printf("count(%d)\n", x);
 		return used[position(x)] == cc;
 	}
 };
