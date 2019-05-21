@@ -2,7 +2,7 @@
 
 #include "base.h"
 
-#define DEBUG
+//#define DEBUG
 
 class HashTable {
 private:
@@ -10,7 +10,7 @@ private:
 	vector<unsigned> used;
 	size_t n;
 	vector<int> table;
-	const static size_t P = 1e9 + 7;
+	const static size_t P = 1e9 + 7; // you may use random, to make it more safe 
 
 private:
 	bool isPrime(size_t n) {
@@ -27,7 +27,7 @@ private:
 		while (used[i] == cc && table[i] != x) {
 			// printf("i = %ld of %ld : used = %d (cc=%d), table = %d, x = %d\n", i, n, used[i], cc, table[i], x);
 			#ifdef DEBUG
-			assert(++cnt <= 10);
+			assert(++cnt <= 15);
 			#endif
 			if (++i == n)
 				i = 0;
@@ -40,10 +40,10 @@ public:
 	}
 
 	void build(const vector<int> &data) {
-		n = 1.5 * (data.size() + 1);
+		n = 2 * (data.size() + 1);
 		while (!isPrime(n))
 			n++;
-		// printf("size: %ld --> %ld\n", data.size(), n);
+		// printf("-------------------------------------- size: %ld --> %ld\n", data.size(), n);
 		table.resize(n);
 		used.resize(n, 0);
 		cc++;
@@ -60,6 +60,7 @@ public:
 		}
 	}
 	bool count(int x) {
+		// printf("count(%d)\n", x);
 		return used[position(x)] == cc;
 	}
 };

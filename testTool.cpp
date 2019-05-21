@@ -1,9 +1,9 @@
-#include "base.h"
-#include "commonElements.h"
-#include "timer.h"
+#include "testTool.h"
+
+#include <algorithm>
+#include <climits>
 
 static std::mt19937 randomNumbers(239017);
-static ostream &logger = cout;
 
 // [L, R]
 size_t randomInt(size_t L, size_t R) {
@@ -20,7 +20,7 @@ vector<int>& gen(int n, int C, vector<int> &result) {
 	return result;
 }
 
-void debug(const vector<int> &a, const string &end = "\n", ostream &o = cerr) {
+void debug(const vector<int> &a, const string &end, ostream &o) {
 	o << '[';
 	if (!a.empty()) {
 		o << a[0];
@@ -72,22 +72,24 @@ void unitTests(const vector<NamedSolution> &solutions) {
 	logger << "unitTests: OK" << endl;
 }
 
+struct GenParams {
+	int minLen, maxLen, c, n;
+};
+
 void testCorrectnessStress(const commonElementsFunc &modelSolution, const vector<NamedSolution> &solutions) {
-	struct GenParams {
-		int minLen, maxLen, c;
-	};
+	const int testsN = 1e3;
 	vector<GenParams> tests = {
-		{1, 6, 10},
-		{10, 20, 10},
-		{10, 20, 100},
-		{100, 10, 100},
+		{1, 6, 10, testsN},
+		{10, 20, 10, testsN},
+		{10, 20, 100, testsN},
+		{10, 20, int(1e9), testsN},
+		// {100, 10, 100, testsN},
 	};
 
 	for (auto test : tests) {
-		int testsN = 1e4;
-		logger << "testCorrectness: start " << testsN << " tests n in [" << test.minLen << "," << test.maxLen << "], c = " << test.c << endl;
+		logger << "testCorrectness: start " << test.n << " tests n in [" << test.minLen << "," << test.maxLen << "], c = " << test.c << endl;
 		double sum = 0;
-		for (int i = 0; i < testsN; i++) {
+		for (int i = 0; i < test.n; i++) {
 			vector<int> a, b;
 			int na = randomInt(test.minLen, test.maxLen);
 			int nb = randomInt(test.minLen, test.maxLen);
@@ -96,15 +98,58 @@ void testCorrectnessStress(const commonElementsFunc &modelSolution, const vector
 			gen(nb, c, b);
 			Test test = {a, b, modelSolution(a, b)};
 			for (auto solution : solutions) {
+				// logger << "[" << solution.name << "]" << endl;
 				run(solution, test);
 			}
 			sum += test.answer;
 		}
-		logger << "testCorrectness: OK, average answer is  " << sum / testsN  << endl;
+		logger << "testCorrectness: OK, average answer is  " << sum / test.n  << endl;
 	}
 	logger << "testCorrectness: END" << endl;
 }
 
-// Returns { time1(i)/time2(i) | i=1..n }
-vector<double> compareSpeed(int n, const commonElementsFunc &solution1, const commonElementsFunc &solution2) { 
+void testTL(const vector<NamedSolution> &solutions) {
+	vector<GenParams> tests = {
+		{int(1e6), int(1e6), int(1e9), 10},
+	};
+	for (auto test : tests) {
+		logger << "testTL: start " << test.n << " tests n in [" << test.minLen << "," << test.maxLen << "], c = " << test.c << endl;
+		for (int i = 0; i < test.n; i++) {
+			vector<int> a, b;
+			int na = randomInt(test.minLen, test.maxLen);
+			int nb = randomInt(test.minLen, test.maxLen);
+			int c = test.c;
+			gen(na, c, a);
+			gen(nb, c, b);
+			for (auto solution : solutions) {
+				logger << "run solution '" << solution.name << "'" << endl;
+				solution.f(a, b);
+			}
+		}
+	}
+	logger << "testTL: END" << endl;
+}
+
+// Returns { time(n) | n \in ns }
+vector<TimeType> calcTime(const vector<int> &ns, const NamedSolution &solution) { 
+	static const int TIME = 3e5;
+	// int aLen = *max_element(all(ns));
+	int c = INT_MAX;
+	vector<int> a, b;
+	vector<TimeType> result;
+	for (int n : ns) {
+		// logger << "calcTime(" << n << ") for " << solution.name << endl;
+		int testsN = TIME / (3 * n);
+		TimeType summaryTime = 0;
+		for (int test = 0; test < testsN; test++) {
+			gen(2 * n, c, a);
+			gen(n, c, b);
+			TimerNano timer;
+			timer.start();
+			solution.f(a, b);
+			summaryTime += timer.time();
+		}
+		result.push_back(summaryTime);
+	}
+	return result;
 }

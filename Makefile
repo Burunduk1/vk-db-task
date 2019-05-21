@@ -1,7 +1,8 @@
-flags = -std=c++17 -O3 -Wall -Wextra
+flags = -std=c++17 -Wall -Wextra -O3 # -pg 
 
-main: main.cpp testTool.cpp commonElements.cpp *.h
-	g++ $(flags) main.cpp testTool.cpp commonElements.cpp -o main #2>&1 | grep -iE "(warning)|(error)|(note)"
+corecpp = base.cpp testTool.cpp commonElements.cpp
+main: Makefile $(corecpp) main.cpp *.h 
+	g++ $(flags) main.cpp $(corecpp)  -o main #2>&1 | grep -iE "(warning)|(error)|(note)"
 
-mainTest: mainTest.cpp testTool.cpp commonElements.cpp *.h
-	g++ $(flags) main.cpp testTool.cpp commonElements.cpp -o main 
+mainTest: Makefile mainTest.cpp $(corecpp) *.h
+	g++ $(flags) mainTest.cpp $(corecpp) -o main 
