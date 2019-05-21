@@ -20,6 +20,7 @@ vector<int>& gen(int n, int C, vector<int> &result) {
 	return result;
 }
 
+// o << a << end
 void debug(const vector<int> &a, const string &end, ostream &o) {
 	o << '[';
 	if (!a.empty()) {
@@ -77,13 +78,13 @@ struct GenParams {
 };
 
 void testCorrectnessStress(const commonElementsFunc &modelSolution, const vector<NamedSolution> &solutions) {
-	const int testsN = 1e3;
+	const int testsN = 1e4;
 	vector<GenParams> tests = {
 		{1, 6, 10, testsN},
 		{10, 20, 10, testsN},
 		{10, 20, 100, testsN},
 		{10, 20, int(1e9), testsN},
-		// {100, 10, 100, testsN},
+		{1, 100, 100, testsN},
 	};
 
 	for (auto test : tests) {
@@ -110,6 +111,7 @@ void testCorrectnessStress(const commonElementsFunc &modelSolution, const vector
 
 void testTL(const vector<NamedSolution> &solutions) {
 	vector<GenParams> tests = {
+		{int(1e6), int(1e6), int(1e6), 10},
 		{int(1e6), int(1e6), int(1e9), 10},
 	};
 	for (auto test : tests) {
@@ -121,28 +123,30 @@ void testTL(const vector<NamedSolution> &solutions) {
 			int c = test.c;
 			gen(na, c, a);
 			gen(nb, c, b);
-			for (auto solution : solutions) {
-				logger << "run solution '" << solution.name << "'" << endl;
-				solution.f(a, b);
+			assert(!solutions.empty());
+			Test test = {a, b, solutions[0].f(a, b)};
+			for (size_t i = 1; i < solutions.size(); i++) {
+				// logger << "run solution '" << solution.name << "'" << endl;
+				run(solutions[i], test);
 			}
 		}
 	}
 	logger << "testTL: END" << endl;
 }
 
-// Returns { time(n) | n \in ns }
-vector<TimeType> calcTime(const vector<int> &ns, const NamedSolution &solution) { 
+// |a| = (smallA ? 2|b| : 1e4)
+// Returns { time(|a|, |b|) | |b| \in ns }
+vector<TimeType> calcTime(bool smallA, const vector<int> &ns, const NamedSolution &solution) { 
 	static const int TIME = 3e5;
-	// int aLen = *max_element(all(ns));
 	int c = INT_MAX;
 	vector<int> a, b;
 	vector<TimeType> result;
 	for (int n : ns) {
-		// logger << "calcTime(" << n << ") for " << solution.name << endl;
-		int testsN = TIME / (3 * n);
+		int aLen = (smallA ? 2 * n : int(1e4));
+		int testsN = TIME / (n + aLen);
 		TimeType summaryTime = 0;
 		for (int test = 0; test < testsN; test++) {
-			gen(2 * n, c, a);
+			gen(aLen, c, a);
 			gen(n, c, b);
 			TimerNano timer;
 			timer.start();

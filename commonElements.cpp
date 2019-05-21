@@ -32,11 +32,14 @@ size_t commonElementsHashTable(const vector<int> &large, const vector<int> &smal
 size_t commonElements(const vector<int> &a, const vector<int> &b) {
 	auto f = [](const vector<int> &large, const vector<int> &small) {
 		size_t n = small.size();
-		static const int C1 = 5;
-		static const int C2 = 20;
+		static const int C1 = 111;
 		if (n < C1)	return commonElementsLinear(large, small);
-		if (n < C2)	return commonElementsSort(large, small);
+		// if (n < C2)	return commonElementsSort(large, small);
 		return commonElementsHashTable(large, small);
 	};
+	#ifdef TEST_MODE
+	return f(a, b);
+	#else
 	return a.size() < b.size() ? f(b, a) : f(a, b);
+	#endif
 }

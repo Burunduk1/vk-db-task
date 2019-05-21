@@ -13,3 +13,4 @@ size_t commonElementsLinear(const vector<int> &a, const vector<int> &b);
 size_t commonElementsSort(const vector<int> &a, const vector<int> &b);
 size_t commonElementsSet(const vector<int> &a, const vector<int> &b);
 size_t commonElementsHashTable(const vector<int> &a, const vector<int> &b);
+size_t commonElements(const vector<int> &a, const vector<int> &b);
