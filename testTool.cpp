@@ -1,5 +1,6 @@
 #include "base.h"
 #include "commonElements.h"
+#include "timer.h"
 
 static std::mt19937 randomNumbers(239017);
 static ostream &logger = cout;
@@ -9,7 +10,8 @@ size_t randomInt(size_t L, size_t R) {
 	return L + randomNumbers() % (R - L + 1);
 }
 
-// generates n integers in [1, C]
+// Generates n integers in [1, C]
+// Can produce duplicates, but it does not matter when we test correctness/speed.
 vector<int>& gen(int n, int C, vector<int> &result) {
 	uniform_int_distribution<int> dist(1, C);
 	result.resize(n);
@@ -71,20 +73,38 @@ void unitTests(const vector<NamedSolution> &solutions) {
 }
 
 void testCorrectnessStress(const commonElementsFunc &modelSolution, const vector<NamedSolution> &solutions) {
-	int testsN = 1e5;
-	logger << "testCorrectness: start " << testsN << " tests" << endl;
-	for (int i = 0; i < testsN; i++) {
-		vector<int> a, b;
-		int na = randomInt(10, 20);
-		int nb = randomInt(10, 20);
-		int c = randomInt(10, 20);
-		gen(na, c, a);
-		gen(nb, c, b);
-		Test test = {a, b, modelSolution(a, b)};
-		for (auto solution : solutions) {
-			run(solution, test);
+	struct GenParams {
+		int minLen, maxLen, c;
+	};
+	vector<GenParams> tests = {
+		{1, 6, 10},
+		{10, 20, 10},
+		{10, 20, 100},
+		{100, 10, 100},
+	};
+
+	for (auto test : tests) {
+		int testsN = 1e4;
+		logger << "testCorrectness: start " << testsN << " tests n in [" << test.minLen << "," << test.maxLen << "], c = " << test.c << endl;
+		double sum = 0;
+		for (int i = 0; i < testsN; i++) {
+			vector<int> a, b;
+			int na = randomInt(test.minLen, test.maxLen);
+			int nb = randomInt(test.minLen, test.maxLen);
+			int c = test.c;
+			gen(na, c, a);
+			gen(nb, c, b);
+			Test test = {a, b, modelSolution(a, b)};
+			for (auto solution : solutions) {
+				run(solution, test);
+			}
+			sum += test.answer;
 		}
+		logger << "testCorrectness: OK, average answer is  " << sum / testsN  << endl;
 	}
-	logger << "testCorrectness: OK" << endl;
+	logger << "testCorrectness: END" << endl;
 }
 
+// Returns { time1(i)/time2(i) | i=1..n }
+vector<double> compareSpeed(int n, const commonElementsFunc &solution1, const commonElementsFunc &solution2) { 
+}
