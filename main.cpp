@@ -38,14 +38,20 @@ int main() {
 		logger << endl;
 	};
 
-	bool smallA = true;
-	vector<int> ns(12);
-	forn(i, ns.size())
-		ns[i] = i + 1;
-	experiment(smallA, ns);
-	forn(i, ns.size())
-		ns[i] = 1 << i;
-	experiment(smallA, ns);
-	smallA = false;
-	experiment(smallA, ns);
+	// bool smallA = true;
+	// vector<int> ns(12);
+	// forn(i, ns.size())
+	// 	ns[i] = i + 1;
+	// experiment(smallA, ns);
+	// forn(i, ns.size())
+	// 	ns[i] = 1 << i;
+	// experiment(smallA, ns);
+	// smallA = false;
+	// experiment(smallA, ns);
+
+	auto opsInOneSec = [](int testsN, int na, int nb) {
+		logger << "OPT: for |b| = " << nb << " is " << (double)testsN * (na + nb) << " operations in " << 1e-9 * calcTime(testsN, na, nb, 1e9, commonElements) << " seconds" << endl;
+	};
+	opsInOneSec(2.1e7, 10, 10);
+	opsInOneSec(4.2e4, 1000, 1000);
 }

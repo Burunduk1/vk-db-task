@@ -149,11 +149,20 @@ vector<TimeType> calcTime(bool smallA, const vector<int> &ns, const NamedSolutio
 			gen(aLen, c, a);
 			gen(n, c, b);
 			TimerNano timer;
-			timer.start();
 			solution.f(a, b);
 			summaryTime += timer.time();
 		}
 		result.push_back(summaryTime);
 	}
 	return result;
+}
+
+TimeType calcTime(int testsN, int na, int nb, int c, const commonElementsFunc &solution) { 
+	vector<int> a, b;
+	gen(na, c, a);
+	gen(nb, c, b);
+	TimerNano timer;
+	while (testsN--)
+		solution(a, b);
+	return timer.time();
 }

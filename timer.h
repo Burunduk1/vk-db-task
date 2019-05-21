@@ -10,6 +10,9 @@ class TimerNano {
 private:
 	chrono::steady_clock::time_point startPoint;
 public:
+	TimerNano() {
+		start();
+	}
 	void start() { 
 		startPoint = chrono::steady_clock::now();
 	}
