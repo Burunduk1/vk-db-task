@@ -28,7 +28,49 @@ void debug(const vector<int> &a, const string &end = "\n", ostream &o = cerr) {
 	o << "]" << end;
 }
 
-void testCorrectness(commonElementsFunc modelSolution, const vector<NamedSolution> &solutions) {
+struct Test {
+	vector<int> a, b;
+	size_t answer;
+};
+
+void run(const NamedSolution &solution, const Test &test) {
+	auto output = solution.f(test.a, test.b);
+	if (test.answer != output) {
+		cerr << "solution '" << solution.name << "' failed" << endl;
+		cerr << "test: ", debug(test.a, " "), debug(test.b);
+		cerr << "output: " << output << endl; 
+		cerr << "answer: " << test.answer << endl; 
+		throw "WA";
+	}
+}
+
+void unitTests(const vector<NamedSolution> &solutions) {
+	vector<Test> tests = {
+		{{1, 2, 3}, {1}, 1},
+		{{1, 2, 3}, {0, 4}, 0},
+		{{1, 2, 3}, {4, 2, 5, 1}, 2},
+		{{}, {}, 0},
+		{{}, {1}, 0},
+		{{1}, {}, 0},
+		{{1}, {1}, 1},
+		{{1}, {2}, 0},
+		{{1, 2, 3}, {1, 2, 3}, 3},
+		{{1, 2, 3, 4, 5, 6, 7}, {1, 4, 7}, 3},
+		{{1, 2, 3, 4, 5, 6, 7}, {2, 4, 6}, 3},
+		{{1, 2, 3, 4, 5, 6, 7}, {3, 4, 5}, 3},
+		{{2, 4, 6}, {1, 2, 3, 4, 5, 6, 7}, 3},
+		{{0, 2, 4, 6, 8, 10}, {0, 3, 6, 9, 12}, 2},
+	};
+	logger << "unitTests: start " << tests.size() << " tests" << endl;
+	for (auto &test : tests) {
+		for (auto solution : solutions) {
+			run(solution, test);
+		}
+	}
+	logger << "unitTests: OK" << endl;
+}
+
+void testCorrectnessStress(const commonElementsFunc &modelSolution, const vector<NamedSolution> &solutions) {
 	int testsN = 1e5;
 	logger << "testCorrectness: start " << testsN << " tests" << endl;
 	for (int i = 0; i < testsN; i++) {
@@ -38,17 +80,11 @@ void testCorrectness(commonElementsFunc modelSolution, const vector<NamedSolutio
 		int c = randomInt(10, 20);
 		gen(na, c, a);
 		gen(nb, c, b);
-		auto answer = modelSolution(a, b);
+		Test test = {a, b, modelSolution(a, b)};
 		for (auto solution : solutions) {
-			auto output = solution.f(a, b);
-			if (answer != output) {
-				cerr << "solution '" << solution.name << "' failed" << endl;
-				cerr << "test: ", debug(a, " "), debug(b);
-				cerr << "output: " << output << endl; 
-				cerr << "answer: " << answer << endl; 
-				throw "WA";
-			}
+			run(solution, test);
 		}
 	}
 	logger << "testCorrectness: OK" << endl;
 }
+

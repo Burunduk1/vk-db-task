@@ -2,15 +2,17 @@
 #include "commonElements.h"
 #include "testTool.h"
 
-commonElementsFunc modelSolution = commonElementsLinear;
 vector<NamedSolution> solutions = {
+	{commonElementsLinear, "linear"},
 	{commonElementsSort, "sort"},
 	{commonElementsSet, "set"},
+	{commonElementsHashTable, "hashtable"},
 };
+commonElementsFunc modelSolution = commonElementsLinear;
 
 int main() {
 	vector<int> a;
 	debug(gen(10, 3, a)), cerr << endl;
-	testCorrectness(commonElementsLinear, solutions);
-	commonElementsFunc f[] = {commonElementsLinear, commonElementsSort, commonElementsSet};
+	unitTests(solutions);
+	testCorrectnessStress(modelSolution, solutions);
 }

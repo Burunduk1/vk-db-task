@@ -10,9 +10,11 @@ size_t commonElementsLinear(const vector<int> &large, const vector<int> &small) 
 }
 
 size_t commonElementsSort(const vector<int> &large, const vector<int> &small) {
-	auto smallCopy = small;
+	static vector<int> smallCopy;
+	smallCopy.resize(small.size());
+	copy(all(small), smallCopy.begin());
 	sort(all(smallCopy));
-	return count_if(all(large), [&smallCopy](int x){ return binary_search(all(smallCopy), x); });
+	return count_if(all(large), [](int x){ return binary_search(all(smallCopy), x); });
 }
 
 size_t commonElementsSet(const vector<int> &large, const vector<int> &small) {
@@ -21,8 +23,9 @@ size_t commonElementsSet(const vector<int> &large, const vector<int> &small) {
 }
 
 size_t commonElementsHashTable(const vector<int> &large, const vector<int> &small) {
-	HashTable<int> smallSet(small);
-	return count_if(all(large), [&smallSet](int x){ return smallSet.count(x); });
+	static HashTable smallSet;
+	smallSet.build(small);
+	return count_if(all(large), [](int x){ return smallSet.count(x); });
 }
 
 /** The solution */
